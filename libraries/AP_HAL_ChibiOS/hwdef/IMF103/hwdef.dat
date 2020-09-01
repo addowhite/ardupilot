@@ -59,82 +59,32 @@ MCU STM32F4xx STM32F427xx
 # Note that APJ is "ArduPilot JSON Firmware Format".
 
 # board ID for firmware load
-APJ_BOARD_ID 109
-
-# Now you need to say what crystal frequency you have for this
-# board. All of the clocks are scaled against this. Typical values are
-# 24000000 or 8000000.
+APJ_BOARD_ID 9
 
 # crystal frequency
-OSCILLATOR_HZ 16000000
+OSCILLATOR_HZ 8000000
 
-define HAL_CUSTOM_CLOCK_TREE
-define STM32_PLLM_VALUE 8
-define STM32_PLLN_VALUE 168
-define STM32_PLLP_VALUE 2
-define STM32_PLLQ_VALUE 7
-
-# On some boards you will need to also set the various PLL values. See
-# the defaults in common/mcuconf.h, and use the define mechanism
-# explained later in this file to override values suitable for your
-# board. Refer to your MCU datasheet or examples from supported boards
-# in ChibiOS for the right values.
-
-# Now define the voltage the MCU runs at. This is needed for ChibiOS
-# to set various internal driver limits. It is in 0.01 volt units.
-
-
-# This is the STM32 timer that ChibiOS will use for the low level
-# driver. This must be a 32 bit timer. We currently only support
-# timers 2, 3, 4, 5 and 21. See hal_st_lld.c in ChibiOS for details.
+# define HAL_CUSTOM_CLOCK_TREE
+# define STM32_PLLM_VALUE 8
+# define STM32_PLLN_VALUE 72
+# define STM32_PLLP_VALUE 2
+# define STM32_PLLQ_VALUE 7
 
 # ChibiOS system timer
 STM32_ST_USE_TIMER 5
 
-# Now the size of flash in kilobytes, for creating the ld.script.
-
 # flash size
-FLASH_SIZE_KB 1024
+FLASH_SIZE_KB 128
 
-# Now define which UART is used for printf(). We rarely use printf()
-# in ChibiOS, so this is really only for debugging very early startup
-# in drivers.
-
-# Serial port for stdout. This is optional. If you leave it out then
-# output from printf() lines will go to the ArduPilot console, which is the
-# first UART in the SERIAL_ORDER list.  But note that some startup code
-# runs before USB is set up.
-# The value for STDOUT_SERIAL is a serial device name, and must be for a
-# serial device for which pins are defined in this file. For example, SD7
-# is for UART7 (SD7 == "serial device 7" in ChibiOS).
-# STDOUT_SERIAL SD7
-# STDOUT_BAUDRATE 57600
-
-# Now the USB setup, if you have USB. All of these settings are
-# option, and the ones below are the defaults. It ends up creating a
-# USB ID on Linux like this:
-# /dev/serial/by-id/usb-ArduPilot_fmuv3_3E0031000B51353233343932-if00
-# If creating a board for a RTF vehicle you may wish to customise these.
+STDOUT_SERIAL SD0
+STDOUT_BAUDRATE 115200
 
 # USB setup
 USB_STRING_MANUFACTURER "ArduPilot"
 USB_STRING_PRODUCT "%BOARD%"
 
-# Now define the order that I2C buses are presented in the hal.i2c API
-# in ArduPilot. For historical reasons inherited from HAL_PX4 the
-# 'external' I2C bus should be bus 1 in hal.i2c, and internal I2C bus
-# should be bus 0. On fmuv3 the STM32 I2C1 is our external bus and
-# I2C2 is our internal bus, so we need to setup the order as I2C2
-# followed by I2C1 in order to achieve the conventional order that
-# drivers expect.
-
 # order of I2C buses
-I2C_ORDER I2C3
-
-# Now the serial ordering. These map to the SERIALn_ parameter numbers
-# If you use a shorter list then HAL_Empty::UARTDriver
-# objects are substituted for later UARTs, or you can leave a gap by
-# listing one or more of the uarts as EMPTY.
+I2C_ORDER I2C2
 
 # The normal usage of this ordering is:
 # 1) SERIAL0: console (primary mavlink, usually USB)
@@ -143,68 +93,14 @@ I2C_ORDER I2C3
 # 4) SERIAL3: primary GPS
 # 5) SERIAL4: GPS2
 # 6) SERIAL5: extra UART (usually RTOS debug console)
+# ?) EMPTY
 
 # order of UARTs (and USB)
-SERIAL_ORDER OTG1 USART6 UART4 USART2
-
-# If the board has an IOMCU connected via a UART then this defines the
-# UART to talk to that MCU. Leave it out for boards with no IOMCU.
-
-# UART for IOMCU
-# IOMCU_UART USART6
-
-# Now we start on the pin definitions. Every pin used by ArduPilot
-# needs to be in this file. The pins in this file can be defined in any order.
-
-# The format is P+port+pin. So PC4 is portC pin4.
-# For every pin the second column is the label. If this is a
-# peripheral that has an alternate function defined in the STM32
-# datasheet then the label must be the name of that alternative
-# function. The names are looked up in the python database for this
-# MCU. Please see STM32F427xx.py for the F427 database. That database
-# is used to automatically fill in the alternative function (and later
-# for the DMA channels).
-
-# The third column is the peripheral type. This must be one of the
-# following: UARTn, USARTn, OTGn, SPIn, I2Cn, ADCn, TIMn, SWD, SDIO,
-# INPUT, OUTPUT, CS.
-
-# The fourth and later columns are for modifiers on the pin. The
-# possible modifiers are:
-# pin speed: SPEED_VERYLOW, SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH
-# pullup: PULLUP, PULLDOWN, FLOATING
-# out type: OPENDRAIN, PUSHPULL
-# default value: LOW, HIGH
-
-# Additionally, each class of pin peripheral can have extra modifiers
-# suitable for that pin type. For example, for an OUTPUT you can map
-# it to a GPIO number in hal.gpio using the GPIO(n) modifier. For ADC
-# inputs you can apply a scaling factor (to bring it to unit volts)
-# using the SCALE(x) modifier. See the examples below for more
-# modifiers, or read the python code in chibios_hwdef.py.
-
-# Now we define UART4 which is for the GPS. Be careful
-# of the difference between USART and UART. Check the STM32F427xx.py
-# if unsure which it is. For a UART we need to specify at least TX and
-# RX pins.
+SERIAL_ORDER OTG1 EMPTY EMPTY USART2
 
 # USART2 serial GPS
 PA2 USART2_TX USART2
 PA3 USART2_RX USART2
-
-# Now define the primary battery connectors. The labels we choose here
-# are used to create defines for pins in the various drivers, so
-# choose names that match existing board setups where possible. Here
-# we define two pins PA2 and PA3 for voltage and current sensing, with
-# a scale factor of 1.0 and connected on ADC1. The pin number this
-# maps to in hal.adc is automatically determined using the datasheet
-# tables in STM32F427xx.py.
-
-# PA2 BATT_VOLTAGE_SENS ADC1 SCALE(1)
-# PA3 BATT_CURRENT_SENS ADC1 SCALE(1)
-
-# Now the VDD sense pin. This is used to sense primary board voltage.
-# PA4 BATT_VOLTAGE_SENS ADC1 SCALE(1)
 
 # Now the first SPI bus. At minimum you need SCK, MISO and MOSI pin
 PA5 SPI1_SCK SPI1
@@ -213,83 +109,39 @@ PA7 SPI1_MOSI SPI1
 
 # This defines an output pin which will default to output LOW. It is a
 # pin that enables peripheral power on this board.
-
 # PA8 VDD_5V_PERIPH_EN OUTPUT LOW
 
-# This is the pin that senses USB being connected. It is an input pin
-# setup as OPENDRAIN.
-PA9 VBUS INPUT OPENDRAIN
-
 # Now we define the pins that USB is connected on.
-# PA10 USB_ID INPUT
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
 
 # Now the first I2C bus. The pin speeds are automatically setup
 # correctly, but can be overridden here if needed.
-PA8 I2C3_SCL I2C3
-PC9 I2C3_SDA I2C3
+PB10 I2C3_SCL I2C2
+PB11 I2C3_SDA I2C2
 
-PB10 BMI088_A_CS CS
-PB11 BMI088_G_CS CS
-PA4 BMP280_CS CS
+# PB10 BMI088_A_CS CS
+# PB11 BMI088_G_CS CS
 
 # SBUS
-PA0 UART4_TX UART4
-PA1 UART4_RX UART4
-
-# The telem2 USART, also with RTS/CTS available.
-# USART3 serial3 telem2
-# PD8 USART3_TX USART3
-# PD9 USART3_RX USART3
-# PD11 USART3_CTS USART3
-# PD12 USART3_RTS USART3
+# PA0 UART4_TX UART4
+# PA1 UART4_RX UART4
 
 # Telemetry
-PC6 USART6_TX USART6
-PC7 USART6_RX USART6
-
-# The CS pin for FRAM (ramtron). This one is marked as using
-# SPEED_VERYLOW, which matches the HAL_PX4 setup.
-# PD10 FRAM_CS CS SPEED_VERYLOW
+# PC6 USART6_TX USART6
+# PC7 USART6_RX USART6
 
 # Now we start defining some PWM pins. We also map these pins to GPIO
 # values, so users can set BRD_PWM_COUNT to choose how many of the PWM
 # outputs on the primary MCU are setup as PWM and how many as
 # GPIOs. To match HAL_PX4 we number the GPIOs for the PWM outputs
 # starting at 50.
-# PE14 TIM1_CH4 TIM1 PWM(1) GPIO(50)
-# PE13 TIM1_CH3 TIM1 PWM(2) GPIO(51)
-# PE11 TIM1_CH2 TIM1 PWM(3) GPIO(52)
-# PE9  TIM1_CH1 TIM1 PWM(4) GPIO(53)
-# PD13 TIM4_CH2 TIM4 PWM(5) GPIO(54)
-# PD14 TIM4_CH3 TIM4 PWM(6) GPIO(55)
-PA15 TIM2_CH1 TIM2 PWM(1) GPIO(50)
-PB3 TIM2_CH2 TIM2 PWM(2) GPIO(51)
-PB4 TIM3_CH1 TIM3 PWM(3) GPIO(52)
-PB5 TIM3_CH2 TIM3 PWM(4) GPIO(53)
-PB6 TIM4_CH1 TIM4 PWM(5) GPIO(54)
-PB7 TIM4_CH2 TIM4 PWM(6) GPIO(55)
-PB8 TIM4_CH3 TIM4 PWM(7) GPIO(56)
-PB9 TIM4_CH4 TIM4 PWM(8) GPIO(57)
+PB6 TIM4_CH1 TIM2 PWM(1) GPIO(50)
+PB7 TIM4_CH2 TIM2 PWM(2) GPIO(51)
+PB8 TIM4_CH3 TIM3 PWM(3) GPIO(52)
+PB9 TIM4_CH4 TIM3 PWM(4) GPIO(53)
 
 define BOARD_PWM_COUNT_DEFAULT 4
-
-# This is the pin to enable the sensors rail. It can be used to power
-# cycle sensors to recover them in case there are problems with power on
-# timing affecting sensor stability. We pull it high by default.
-# PE3 VDD_3V3_SENSORS_EN OUTPUT HIGH
-
-# Define a LED, mapping it to GPIO(0). LOW will illuminate the LED
-# PE12 FMU_LED_AMBER OUTPUT HIGH OPENDRAIN GPIO(0)
-
-# Power flag pins: these tell the MCU the status of the various power
-# supplies that are available. The pin names need to exactly match the
-# names used in AnalogIn.cpp.
-# PB5 VDD_BRICK_nVALID INPUT PULLUP
-# PB7 VDD_BRICK2_nVALID INPUT PULLUP
-# PE10 VDD_5V_HIPOWER_nOC INPUT PULLUP
-# PE15 VDD_5V_PERIPH_nOC INPUT PULLUP
 
 # Now the SPI device table. This table creates all accessible SPI
 # devices, giving the name of the device (which is used by device
@@ -328,14 +180,11 @@ define BOARD_PWM_COUNT_DEFAULT 4
 # SPIDEV external0m3    SPI4 DEVID5  MPU_EXT_CS   MODE3  2*MHZ  2*MHZ
 # SPIDEV pixartPC15     SPI4 DEVID13 ACCEL_EXT_CS MODE3  2*MHZ  2*MHZ
 
-SPIDEV bmi088_a SPI1 DEVID1 BMI088_A_CS MODE3 2*MHZ 2*MHZ
-SPIDEV bmi088_g SPI1 DEVID2 BMI088_G_CS MODE3 2*MHZ 2*MHZ
-SPIDEV bmp280   SPI1 DEVID3 BMP280_CS   MODE3 1*MHZ 8*MHZ
+# SPIDEV bmi088_a SPI1 DEVID2 BMI088_A_CS MODE3 2*MHZ 2*MHZ
+# SPIDEV bmi088_g SPI1 DEVID3 BMI088_G_CS MODE3 2*MHZ 2*MHZ
 
-IMU BMI088 SPI:bmi088_a SPI:bmi088_g ROTATION_NONE
-IMU Invensense I2C:0:0x68 ROTATION_ROLL_180
-
-BARO BMP280 SPI:bmp280
+# IMU BMI088 SPI:bmi088_a SPI:bmi088_g ROTATION_NONE
+# IMU Invensense I2C:0:0x68 ROTATION_ROLL_180
 
 # Now some commented out SPI device names which can be used by
 # developers to test that the clock calculations are right for a
@@ -351,11 +200,11 @@ BARO BMP280 SPI:bmp280
 
 define ALLOW_ARM_NO_COMPASS
 define HAL_COMPASS_DEFAULT HAL_COMPASS_NONE
-define HAL_PROBE_EXTERNAL_I2C_COMPASSES
-define HAL_I2C_INTERNAL_MASK 0
+# define HAL_PROBE_EXTERNAL_I2C_COMPASSES
+# define HAL_I2C_INTERNAL_MASK 0
 # define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 
-# define HAL_INS_DEFAULT HAL_INS_NONE
+define HAL_INS_DEFAULT HAL_INS_NONE
 define HAL_BARO_DEFAULT HAL_BARO_NONE
 define HAL_BARO_ALLOW_INIT_NO_BARO
 
@@ -381,25 +230,12 @@ define HAL_HAVE_SAFETY_SWITCH 0
 
 define HAL_HAVE_BOARD_VOLTAGE 0
 
-# This enables the use of a ramtron device for storage, if one is
-# found on SPI. You must have a ramtron entry in the SPI device table.
-
-# Enable RAMTROM parameter storage.
-# define HAL_WITH_RAMTRON 1
-
 # Setup for the possibility of an IMU heater since the pixhawk2 cube has
 # an IMU heater.
 define HAL_HAVE_IMU_HEATER 0
 
 # Enable FAT filesystem support (needs a microSD defined via SDIO).
 # define HAL_OS_FATFS_IO 1
-
-# Now setup the default battery pins driver analog pins and default
-# scaling for the power brick.
-# define HAL_BATT_VOLT_PIN 2
-# define HAL_BATT_CURR_PIN 3
-# define HAL_BATT_VOLT_SCALE 10.1
-# define HAL_BATT_CURR_SCALE 17.0
 
 # This defines the default maximum clock on I2C devices.
 define HAL_I2C_MAX_CLOCK 400000
@@ -409,8 +245,8 @@ define HAL_I2C_MAX_CLOCK 400000
 # DMA_PRIORITY USART6 * SPI*
 
 # Don't share SBUS input
-DMA_NOSHARE SPI1 UART4_RX
-DMA_PRIORITY SPI1 UART4
+# DMA_NOSHARE SPI* UART4_RX
+# DMA_PRIORITY SPI1 UART4
 
 # List of files to put in ROMFS. For fmuv3 we need an IO firmware so
 # we can automatically update the IOMCU firmware on boot. The format
