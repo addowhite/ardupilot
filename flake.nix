@@ -16,6 +16,8 @@
       dontConfigure = true;
       dontPatch = true;
       nativeBuildInputs = [
+        xterm
+        bash
       ];
       buildInputs = [
         coreutils
@@ -37,9 +39,14 @@
         cp -R --no-preserve=mode $out/. /tmp/ardupilot
         chmod +x /tmp/ardupilot/modules/waf/waf-light
         cd /tmp/ardupilot/Tools/autotest
-        python3 sim_vehicle.py -v ArduCopter -i"50" --out=tcp:127.0.0.1:14552 --add-param-file=50.parm &
-        sleep 1 && python3 sim_vehicle.py -v ArduCopter -i"60" --out=tcp:127.0.0.1:14552 --add-param-file=60.parm
-        #python3 sim_vehicle.py -v ArduCopter -i"70" --out=tcp:127.0.0.1:14552 --add-param-file=70.parm
+        #trap 'kill 0' SIGINT;
+        xterm -e bash -c "python3 sim_vehicle.py -v ArduCopter --out=tcp:127.0.0.1:14552 --auto-sysid --instance 50" &
+        disown
+        xterm -e bash -c "python3 sim_vehicle.py -v ArduCopter --out=tcp:127.0.0.1:14552 --auto-sysid --instance 60" &
+        disown
+        xterm -e bash -c "python3 sim_vehicle.py -v ArduCopter --out=tcp:127.0.0.1:14552 --auto-sysid --instance 70" &
+        disown
+        #wait
         EOF
 
         chmod +x $out/bin/ardupilot-sim
