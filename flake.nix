@@ -20,6 +20,7 @@
       buildInputs = [
         coreutils
         git
+        mavproxy
         python311
         python311Packages.pexpect
         python311Packages.pymavlink
@@ -36,7 +37,9 @@
         cp -R --no-preserve=mode $out/. /tmp/ardupilot
         chmod +x /tmp/ardupilot/modules/waf/waf-light
         cd /tmp/ardupilot/Tools/autotest
-        python3 sim_vehicle.py -v ArduCopter -i"1 2 3"
+        python3 sim_vehicle.py -v ArduCopter -i"50" --out=tcp:127.0.0.1:14552 --add-param-file=50.parm &
+        sleep 1 && python3 sim_vehicle.py -v ArduCopter -i"60" --out=tcp:127.0.0.1:14552 --add-param-file=60.parm
+        #python3 sim_vehicle.py -v ArduCopter -i"70" --out=tcp:127.0.0.1:14552 --add-param-file=70.parm
         EOF
 
         chmod +x $out/bin/ardupilot-sim
