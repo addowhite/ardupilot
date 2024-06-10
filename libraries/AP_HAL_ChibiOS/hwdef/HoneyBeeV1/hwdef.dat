@@ -162,10 +162,9 @@ SPIDEV icm42688  SPI2 DEVID1 ICM42688_CS MODE3  2*MHZ 16*MHZ
 SPIDEV dataflash SPI2 DEVID4 FLASH_CS    MODE3 32*MHZ 32*MHZ
 
 # minimal drivers to reduce flash usage
-include ../include/minimal.inc
+include ../include/minimize_common.inc
 include ../include/minimize_features.inc
 include ../include/no_bootloader_DFU.inc
-include ../include/save_some_flash.inc
 #define AP_BATTERY_SYNTHETIC_CURRENT_ENABLED 0
 
 #define DEFAULT_NTF_LED_TYPES 257
