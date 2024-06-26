@@ -73,6 +73,9 @@ PB5 FLASH_CS CS
 # only one I2C bus in normal config
 PB6 I2C1_SCL I2C1
 PB7 I2C1_SDA I2C1
+AP_COMPASS_QMC5883L_ENABLED 0
+#NODMA I2C*
+#define STM32_I2C_USE_DMA FALSE
 
 # TODO: analog pins
 #PB0 BATT_CURRENT_SENS ADC1 SCALE(1)
@@ -144,7 +147,7 @@ define AP_BARO_BMP388_ENABLED 1
 # no built-in compass, but probe the i2c bus for all possible
 # external compass types
 define ALLOW_ARM_NO_COMPASS
-define HAL_PROBE_EXTERNAL_I2C_COMPASSES
+undef HAL_PROBE_EXTERNAL_I2C_COMPASSES
 define HAL_I2C_INTERNAL_MASK 0
 define HAL_BARO_ALLOW_INIT_NO_BARO 1
 
