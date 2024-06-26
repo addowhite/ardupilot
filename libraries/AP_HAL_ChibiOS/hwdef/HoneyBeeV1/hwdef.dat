@@ -4,6 +4,8 @@ MCU STM32F4xx STM32F405xx
 # board ID for firmware load
 APJ_BOARD_ID 1081
 
+define AP_CUSTOM_FIRMWARE_STRING "HoneyBee"
+
 # crystal frequency
 OSCILLATOR_HZ 8000000
 
@@ -32,24 +34,10 @@ FLASH_SIZE_KB 1024
 # reserve 32k for bootloader and 32k for flash storage
 FLASH_RESERVE_START_KB 64
 
-#FLASH_RESERVE_START_KB 48
-
-#define DMA_RESERVE_SIZE 2048
-
 # keep ROMFS uncompressed as we don't have enough RAM
 # to uncompress the bootloader at runtime
 #env ROMFS_UNCOMPRESSED True
 
-# stack for fast interrupts
-#define PORT_INT_REQUIRED_STACK 64
-
-# MAIN_STACK is stack for ISR handlers
-#MAIN_STACK 0x800
-
-# PROCESS_STACK controls stack for main thread
-#PROCESS_STACK 0x800
-
-undef BARO
 define HAL_HAVE_SAFETY_SWITCH 0
 define HAL_HAVE_IMU_HEATER 0
 
@@ -60,7 +48,6 @@ define HAL_I2C_MAX_CLOCK 400000
 
 # order of UARTs (and USB)
 SERIAL_ORDER OTG1 USART2 UART5 USART3 UART4
-#SERIAL_ORDER OTG1 USART2
 
 # LEDs
 #PB2 LED_BLUE OUTPUT LOW GPIO(0)
@@ -87,12 +74,12 @@ PB5 FLASH_CS CS
 PB6 I2C1_SCL I2C1
 PB7 I2C1_SDA I2C1
 
-# analog pins
+# TODO: analog pins
 #PB0 BATT_CURRENT_SENS ADC1 SCALE(1)
 #PB1 BATT_VOLTAGE_SENS ADC1 SCALE(1)
-##PA4 RSSI_ADC_PIN ADC1 SCALE(1)
+#PA4 RSSI_ADC_PIN ADC1 SCALE(1)
 
-# define default battery setup
+# TODO: battery setup
 #define HAL_BATT_MONITOR_DEFAULT 4
 #define HAL_BATT_VOLT_PIN 10
 #define HAL_BATT_CURR_PIN 11
@@ -102,8 +89,6 @@ PB7 I2C1_SDA I2C1
 # USART2 (TELEM RADIO)
 PA2 USART2_TX USART2
 PA3 USART2_RX USART2
-#PA0 USART2_CTS USART2
-#PA1 USART2_RTS USART2
 define DEFAULT_SERIAL2_PROTOCOL SerialProtocol_MAVLink
 define DEFAULT_SERIAL2_BAUD 38400
 
@@ -111,7 +96,9 @@ define DEFAULT_SERIAL2_BAUD 38400
 PB10 USART3_TX USART3 NODMA
 PB11 USART3_RX USART3 NODMA
 define DEFAULT_SERIAL3_PROTOCOL SerialProtocol_Sbus1
-#PC6 TIM8_CH1 TIM8 RCININT PULLDOWN LOW DMA_CH0 # For non-serial RCIN
+
+# TODO: Use for non-serial RCIN
+#PC6 TIM8_CH1 TIM8 RCININT PULLDOWN LOW DMA_CH0
 
 # UART4 (RS232)
 PC10 UART4_TX UART4 NODMA
@@ -133,8 +120,7 @@ PB8 CAN1_RX CAN1
 #define HAL_CAN_POOL_SIZE 6000
 define CAN_APP_NODE_NAME "org.ardupilot.HoneyBeeV1"
 
-# PWM out pins. Note that channel order follows the ArduPilot motor
-## order conventions
+# PWM out pins. Note that channel order follows the ArduPilot motor order conventions
 PA8  TIM1_CH1 TIM1 PWM(1) GPIO(50)
 PA15 TIM2_CH1 TIM2 PWM(2) GPIO(51)
 PC9  TIM8_CH4 TIM8 PWM(3) GPIO(52)
@@ -144,12 +130,22 @@ PC8  TIM8_CH3 TIM8 PWM(4) GPIO(53)
 IMU BMI088 SPI:bmi088_a SPI:bmi088_g ROTATION_YAW_270
 IMU Invensensev3 SPI:icm42688 ROTATION_ROLL_180
 
+# Barometer
+#BARO BMP280 I2C:0:0x76
+#BARO BMP280 I2C:0:0x77
+#define AP_BARO_BACKEND_DEFAULT_ENABLED 0
+#define AP_BARO_BMP280_ENABLED 1
+
+BARO BMP388 I2C:0:0x76
+BARO BMP388 I2C:0:0x77
+define AP_BARO_BACKEND_DEFAULT_ENABLED 0
+define AP_BARO_BMP388_ENABLED 1
+
 # no built-in compass, but probe the i2c bus for all possible
 # external compass types
 define ALLOW_ARM_NO_COMPASS
 define HAL_PROBE_EXTERNAL_I2C_COMPASSES
 define HAL_I2C_INTERNAL_MASK 0
-define HAL_BARO_DEFAULT HAL_BARO_NONE
 define HAL_BARO_ALLOW_INIT_NO_BARO 1
 
 # Motor order implies Betaflight/X for standard ESCs
@@ -166,5 +162,3 @@ include ../include/minimize_common.inc
 include ../include/minimize_features.inc
 include ../include/no_bootloader_DFU.inc
 #define AP_BATTERY_SYNTHETIC_CURRENT_ENABLED 0
-
-#define DEFAULT_NTF_LED_TYPES 257
